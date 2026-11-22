@@ -157,7 +157,7 @@ export default function App() {
   async function signInWithProvider(provider: "google" | "linkedin_oidc") {
     if (!supabase) { setAuthMessage("La conexión de cuentas no está disponible."); return; }
     setAuthBusy(true); setAuthMessage("");
-    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin } });
+    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin, queryParams: provider === "google" ? { prompt: "select_account" } : undefined } });
     if (error) { setAuthBusy(false); setAuthMessage(provider === "google" ? "No se pudo iniciar con Google. Comprueba su configuración en Supabase." : "No se pudo iniciar con LinkedIn. Comprueba su configuración en Supabase."); }
   }
 
