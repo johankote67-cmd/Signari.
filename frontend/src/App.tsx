@@ -233,6 +233,25 @@ export default function App() {
         <div className="auth-switch">{authMode === "register" ? "Already have an account?" : "¿Aún no tienes cuenta?"}<button type="button" onClick={() => { setAuthMode(authMode === "register" ? "login" : "register"); setAuthMessage(""); }}> {authMode === "register" ? "Iniciar Sesión" : "Crear cuenta"}</button></div>
         {authMode === "register" && <div className="auth-social"><div className="auth-divider"><span>Or sign up with</span></div><div className="auth-social-row"><button type="button" onClick={() => signInWithProvider("google")} disabled={authBusy || !isSupabaseConfigured}><b className="google-mark">G</b>Google</button><button type="button" onClick={() => signInWithProvider("linkedin_oidc")} disabled={authBusy || !isSupabaseConfigured}><b className="linkedin-mark">in</b>LinkedIn</button></div><p>Si un proveedor no está configurado en Supabase, aparecerá un aviso.</p></div>}
       </div></section>
+      {authLegalView && <div className="auth-legal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setAuthLegalView(null); }}>
+        <section className="auth-legal-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-legal-title">
+          <button className="auth-legal-close" type="button" aria-label="Cerrar" onClick={() => setAuthLegalView(null)}>×</button>
+          <h2 id="auth-legal-title">{authLegalView === "terms" ? "Términos de Servicio" : "Política de Privacidad"}</h2>
+          {authLegalView === "terms" ? <>
+            <p>Al crear una cuenta en Signari, aceptas utilizar la plataforma de manera lícita y respetuosa.</p>
+            <h3>Uso de la plataforma</h3><p>Signari ofrece recursos educativos introductorios sobre Lengua de Señas Mexicana. El contenido puede actualizarse y no sustituye la enseñanza impartida por personas expertas ni la interacción con la comunidad sorda.</p>
+            <h3>Tu cuenta</h3><p>Eres responsable de mantener la confidencialidad de tus credenciales y de proporcionar información veraz. No compartas tu contraseña.</p>
+            <h3>Contenido y disponibilidad</h3><p>Algunas unidades pueden estar en preparación. Procuraremos mantener el servicio disponible, aunque pueden existir interrupciones o cambios.</p>
+          </> : <>
+            <p>Signari utiliza los datos que proporcionas para crear y administrar tu cuenta y guardar tu avance de aprendizaje.</p>
+            <h3>Datos que tratamos</h3><p>Podemos almacenar nombre, correo electrónico, empresa si la proporcionas, identificador de cuenta y progreso de lecciones.</p>
+            <h3>Uso y almacenamiento</h3><p>La autenticación y los datos de cuenta se gestionan mediante Supabase. El progreso puede guardarse en este dispositivo y sincronizarse con tu cuenta.</p>
+            <h3>Tus opciones</h3><p>No introduzcas información sensible en los campos de perfil. Puedes dejar de usar el servicio y solicitar información o apoyo sobre tus datos mediante los canales de contacto que Signari publique.</p>
+          </>}
+          <p className="auth-legal-note">Aviso: este texto es una versión inicial informativa y debe revisarse y completarse con los datos legales y de contacto del responsable de Signari antes de su lanzamiento público.</p>
+          <button className="auth-legal-accept" type="button" onClick={() => setAuthLegalView(null)}>Entendido</button>
+        </section>
+      </div>}
     </main>
   );
 
