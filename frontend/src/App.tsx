@@ -79,9 +79,11 @@ export default function App() {
   const [submitted, setSubmitted] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [authUser, setAuthUser] = useState<{ id: string; email?: string } | null>(null);
-  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authMode, setAuthMode] = useState<"login" | "register">("register");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [authPasswordConfirm, setAuthPasswordConfirm] = useState("");
+  const [authChecked, setAuthChecked] = useState(false);
   const [authName, setAuthName] = useState("");
   const [authMessage, setAuthMessage] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
@@ -91,11 +93,12 @@ export default function App() {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getSession().then(({ data }) => setAuthUser(data.session?.user ? { id: data.session.user.id, email: data.session.user.email } : null));
+    supabase.auth.getSession().then(({ data }) => { setAuthUser(data.session?.user ? { id: data.session.user.id, email: data.session.user.email } : null); setAuthChecked(true); }).catch(() => setAuthChecked(true));
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
       setCloudReady(false);
       setAuthMessage("");
+      setAuthChecked(true);
     });
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -123,7 +126,8 @@ export default function App() {
 
   async function submitAuth(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!supabase) return;
+    if (!supabase) { setAuthMessage("La conexión de cuentas no está disponible en este momento."); return; }
+    if (authMode === "register" && authPassword !== authPasswordConfirm) { setAuthMessage("Las contraseñas no coinciden."); return; }
     setAuthBusy(true); setAuthMessage("");
     const result = authMode === "register"
       ? await supabase.auth.signUp({ email: authEmail, password: authPassword, options: { data: { display_name: authName } } })
@@ -165,6 +169,42 @@ export default function App() {
   }
   function startPractice() { setAnswers({}); setSubmitted(false); setView("practice"); setMobileMenu(false); }
   const score = questions.filter((item, index) => answers[index] === item.correct).length;
+
+  if (!authChecked) return <main className="auth-loading"><span className="auth-brand-mark">S</span><p>Preparando tu espacio Signari…</p></main>;
+
+  if (!authUser) return (
+    <main className="auth-screen">
+      <div className="auth-decoration auth-decoration-one" aria-hidden="true" />
+      <div className="auth-decoration auth-decoration-two" aria-hidden="true" />
+      <section className="auth-shell">
+        <a className="auth-brand" href="#registro" aria-label="Signari, inicio">
+          <span className="auth-brand-mark">S</span><span>signari</span>
+        </a>
+        <div className="auth-card">
+          <div className="auth-card-intro">
+            <span className="auth-kicker">APRENDE · COMUNICA · CONECTA</span>
+            <h1>{authMode === "register" ? <>Tu camino en LSM<br /><span>comienza aquí.</span></> : <>Qué gusto<br /><span>tenerte de vuelta.</span></>}</h1>
+            <p>{authMode === "register" ? "Crea tu cuenta gratuita y descubre la Lengua de Señas Mexicana a tu propio ritmo." : "Inicia sesión para continuar aprendiendo y mantener tu progreso."}</p>
+          </div>
+          <form className="auth-form" onSubmit={submitAuth}>
+            {authMode === "register" && <label>Nombre completo<input autoComplete="name" placeholder="¿Cómo te llamas?" value={authName} onChange={(e) => setAuthName(e.target.value)} required /></label>}
+            <label>Correo electrónico<input autoComplete="email" type="email" placeholder="tucorreo@ejemplo.com" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required /></label>
+            <label>Contraseña<input autoComplete={authMode === "register" ? "new-password" : "current-password"} type="password" placeholder="Mínimo 6 caracteres" minLength={6} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /></label>
+            {authMode === "register" && <label>Confirmar contraseña<input autoComplete="new-password" type="password" placeholder="Escribe de nuevo tu contraseña" minLength={6} value={authPasswordConfirm} onChange={(e) => setAuthPasswordConfirm(e.target.value)} required /></label>}
+            {authMessage && <p className="auth-feedback" role="status">{authMessage}</p>}
+            {!isSupabaseConfigured && <p className="auth-feedback">El servicio de cuentas aún no está configurado.</p>}
+            <button className="auth-submit" type="submit" disabled={authBusy || !isSupabaseConfigured}>{authBusy ? "Un momento…" : authMode === "register" ? "Crear mi cuenta" : "Iniciar sesión"}<span>→</span></button>
+          </form>
+          <div className="auth-switch">
+            {authMode === "register" ? "¿Ya tienes una cuenta?" : "¿Aún no tienes cuenta?"}
+            <button type="button" onClick={() => { setAuthMode(authMode === "register" ? "login" : "register"); setAuthMessage(""); }}> {authMode === "register" ? "Inicia sesión" : "Regístrate gratis"}</button>
+          </div>
+          <p className="auth-legal">Al continuar, aceptas utilizar Signari de forma respetuosa y responsable.</p>
+        </div>
+        <p className="auth-footer">Un espacio para aprender y construir comunidad.</p>
+      </section>
+    </main>
+  );
 
   return (
     <div className="app-layout">
