@@ -154,3 +154,12 @@ body{background:#f7f5fa;color:var(--signari-ink)}
 .auth-footer{margin:19px 0 0;color:#9b92a7;text-align:center;font-size:10px}
 @media(max-width:480px){.auth-screen{align-items:flex-start;padding:23px 14px}.auth-shell{margin:auto 0}.auth-brand{margin-bottom:18px}.auth-card{border-radius:19px}.auth-card-intro h1{font-size:32px}}
 @media(prefers-reduced-motion:reduce){.auth-form input{transition:none}}
+
+
+/* Acceso visible a la futura descarga Android */
+.auth-topbar{position:absolute;z-index:3;top:20px;right:26px}
+.auth-download{display:flex;min-height:40px;align-items:center;gap:9px;padding:0 13px;border:1px solid #e4d9f2;border-radius:11px;background:rgba(255,255,255,.82);color:#6946a7;font:700 11px "DM Sans",sans-serif;box-shadow:0 5px 18px rgba(65,42,100,.06);opacity:1}
+.auth-download:disabled{cursor:not-allowed;opacity:.9}
+.auth-download-icon{display:grid;width:22px;height:22px;place-items:center;border-radius:7px;background:#f0e9fa;font-size:17px;line-height:1}
+.auth-download small{padding:4px 6px;border-radius:6px;background:#f3eef9;color:#8b78a5;font-size:8px;font-weight:800}
+@media(max-width:480px){.auth-topbar{top:13px;right:13px}.auth-download{min-height:35px;gap:6px;padding:0 9px;font-size:10px}.auth-download-icon{width:19px;height:19px}.auth-download small{font-size:7px}}
