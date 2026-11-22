@@ -12,7 +12,7 @@ Facilitar el aprendizaje de LSM mediante lecciones visuales, práctica guiada, a
 - **Android:** aplicación instalable construida a partir del frontend compartido.
 - **Cuenta y progreso:** sincronización mediante un backend común.
 
-## Arquitectura prevista
+## Arquitectura
 
 - Frontend: React + TypeScript + Vite.
 - Android: Capacitor.
@@ -20,7 +20,7 @@ Facilitar el aprendizaje de LSM mediante lecciones visuales, práctica guiada, a
 - Publicación web: Netlify.
 - Control de versiones: GitHub.
 
-Netlify se utilizará para publicar la web; no sustituye la base de datos. Supabase será el servicio de backend previsto. Las claves privadas nunca deben guardarse en el frontend ni subirse al repositorio.
+Netlify publica la web; no sustituye la base de datos. Supabase es el backend. Las claves privadas nunca deben guardarse en el frontend ni subirse al repositorio.
 
 ## Estructura
 
@@ -36,16 +36,18 @@ SIGNARI/
 │       └── investigacion/
 ├── frontend/
 ├── backend/
+├── supabase/
+│   └── migrations/
 └── README.md
 ```
 
 ## Desarrollo local
 
-Requisitos previstos: Node.js LTS y npm.
+Requisitos: Node.js LTS y npm.
 
-El frontend ya incluye una primera experiencia educativa navegable: panel de aprendizaje, módulos y lecciones introductorias, práctica de conocimientos y progreso guardado localmente en el navegador. Las unidades de alfabeto y vocabulario permanecen en preparación hasta contar con material visual documentado y revisado.
+El frontend incluye una primera experiencia educativa navegable: panel de aprendizaje, módulos, lecciones introductorias, práctica y progreso local. El contenido visual de alfabeto y vocabulario se incorporará con fuentes y validación especializada.
 
-Para iniciar el frontend:
+Para iniciar:
 
 ```bash
 cd frontend
@@ -53,28 +55,27 @@ npm install
 npm run dev
 ```
 
-Consulta la documentación de arquitectura en `documentacion/arquitectura/README.md`.
-
-## Principios del proyecto
+## Principios
 
 - Accesibilidad, diseño adaptable y lenguaje claro.
 - Respetar la diversidad regional y cultural de la LSM.
 - No inventar ni presentar señas sin fuente y validación.
 - Proteger los datos personales y el progreso de los estudiantes.
-- Funciones gratuitas esenciales; Premium será voluntario.
-- Publicidad discreta: nunca dentro de actividades, tareas o contenido de trabajo. Los videos recompensados serán opcionales.
-- La compra Premium podrá retirar los anuncios, sin bloquear el aprendizaje básico.
+- Funciones gratuitas esenciales; Premium voluntario.
+- Publicidad discreta, nunca dentro de actividades o trabajos. Videos recompensados opcionales.
+- Premium podrá retirar anuncios sin bloquear el aprendizaje básico.
 
-## Estado actual
+## Estado del proyecto
 
-- [x] Estructura inicial y documentación del proyecto.
-- [x] Panel educativo responsive con navegación por módulos.
-- [x] Lecciones introductorias sobre LSM, comunidad sorda y comunicación visual.
-- [x] Práctica de conocimientos con revisión de respuestas.
-- [x] Seguimiento de avance guardado localmente en el navegador.
-- [ ] Contenido visual de alfabeto y vocabulario, pendiente de fuentes y validación especializada.
-- [x] Esquema inicial de perfiles y progreso con políticas RLS preparado para Supabase.\n- [ ] Crear el proyecto Supabase, ejecutar la migración y conectar cuentas y sincronización.
+- [x] Estructura inicial y documentación.
+- [x] Panel educativo responsive y lecciones introductorias.
+- [x] Práctica de conocimientos y progreso local.
+- [x] Proyecto Supabase creado y activo.
+- [x] Tablas de perfiles y progreso creadas con RLS.
+- [x] Migración inicial aplicada y verificada.
+- [ ] Integrar y probar registro, inicio/cierre de sesión y sincronización web/Android.
+- [ ] Completar contenido visual LSM con fuentes y revisión especializada.
 - [ ] Aplicación Android con Capacitor.
 - [ ] Panel administrativo, publicidad y Premium.
 
-El esquema de base de datos está preparado, pero todavía no hay un proyecto Supabase conectado. El progreso actual se almacena en el dispositivo y todavía no se sincroniza entre la web y Android. Esta versión es una base funcional de aprendizaje, no la plataforma final.
+La base de datos está lista para comenzar la integración de cuentas y sincronización. La interfaz todavía conserva el progreso local; no afirmar que la sincronización entre dispositivos está activa hasta implementarla y probarla.
