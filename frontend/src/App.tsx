@@ -85,6 +85,10 @@ export default function App() {
   const [authPasswordConfirm, setAuthPasswordConfirm] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
   const [authName, setAuthName] = useState("");
+  const [authCompany, setAuthCompany] = useState("");
+  const [authAcceptedTerms, setAuthAcceptedTerms] = useState(false);
+  const [showAuthPassword, setShowAuthPassword] = useState(false);
+  const [showAuthPasswordConfirm, setShowAuthPasswordConfirm] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
   const [cloudReady, setCloudReady] = useState(false);
@@ -128,9 +132,10 @@ export default function App() {
     event.preventDefault();
     if (!supabase) { setAuthMessage("La conexión de cuentas no está disponible en este momento."); return; }
     if (authMode === "register" && authPassword !== authPasswordConfirm) { setAuthMessage("Las contraseñas no coinciden."); return; }
+    if (authMode === "register" && !authAcceptedTerms) { setAuthMessage("Debes aceptar los Términos de Servicio y la Política de Privacidad."); return; }
     setAuthBusy(true); setAuthMessage("");
     const result = authMode === "register"
-      ? await supabase.auth.signUp({ email: authEmail, password: authPassword, options: { data: { display_name: authName } } })
+      ? await supabase.auth.signUp({ email: authEmail, password: authPassword, options: { data: { display_name: authName, company: authCompany } } })
       : await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
     setAuthBusy(false);
     if (result.error) { setAuthMessage(result.error.message); return; }
@@ -184,42 +189,32 @@ export default function App() {
 
   if (!authUser) return (
     <main className="auth-screen">
-      <div className="auth-topbar">
-        <button className="auth-download" type="button" disabled aria-label="Descargar aplicación Android: próximamente" title="La aplicación Android estará disponible cuando terminemos y publiquemos la APK.">
-          <span className="auth-download-icon" aria-hidden="true">↓</span>
-          <span>Descargar aplicación</span>
-          <small>Próximamente</small>
-        </button>
-      </div>
-      <div className="auth-decoration auth-decoration-one" aria-hidden="true" />
-      <div className="auth-decoration auth-decoration-two" aria-hidden="true" />
-      <section className="auth-shell">
-        <a className="auth-brand" href="#registro" aria-label="Signari, inicio">
-          <span className="auth-brand-mark">S</span><span>signari</span>
+      <div className="auth-facets" aria-hidden="true"><span /><span /><span /><span /><span /><span /></div>
+      <section className="auth-shell"><div className="auth-card">
+        <a className="auth-brand" href="#registro" aria-label="Signari">
+          <span className="auth-brand-mark"><svg viewBox="0 0 42 42" aria-hidden="true"><path d="M29.8 9.2c-2.1-2.3-5-3.4-8.7-3.4-6.1 0-10.2 3.2-10.2 8 0 4.3 3.2 6.2 9.6 7.4l2.2.4c4.4.8 6.1 1.8 6.1 4.1 0 2.6-2.5 4.3-6.7 4.3-4 0-7.2-1.5-9.6-4.5" fill="none" stroke="#21c4d0" strokeWidth="5" strokeLinecap="round"/><path d="M12.2 32.8c2.2 2.3 5.1 3.4 8.8 3.4 6.1 0 10.2-3.2 10.2-8 0-4.3-3.2-6.2-9.6-7.4l-2.2-.4c-4.4-.8-6.1-1.8-6.1-4.1 0-2.6 2.5-4.3 6.7-4.3 4 0 7.2 1.5 9.6 4.5" fill="none" stroke="#3988ff" strokeWidth="5" strokeLinecap="round"/></svg></span><span>SIGNARI</span>
         </a>
-        <div className="auth-card">
-          <div className="auth-card-intro">
-            <span className="auth-kicker">APRENDE · COMUNICA · CONECTA</span>
-            <h1>{authMode === "register" ? <>Tu camino en LSM<br /><span>comienza aquí.</span></> : <>Qué gusto<br /><span>tenerte de vuelta.</span></>}</h1>
-            <p>{authMode === "register" ? "Crea tu cuenta gratuita y descubre la Lengua de Señas Mexicana a tu propio ritmo." : "Inicia sesión para continuar aprendiendo y mantener tu progreso."}</p>
-          </div>
-          <form className="auth-form" onSubmit={submitAuth}>
-            {authMode === "register" && <label>Nombre completo<input autoComplete="name" placeholder="¿Cómo te llamas?" value={authName} onChange={(e) => setAuthName(e.target.value)} required /></label>}
-            <label>Correo electrónico<input autoComplete="email" type="email" placeholder="tucorreo@ejemplo.com" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required /></label>
-            <label>Contraseña<input autoComplete={authMode === "register" ? "new-password" : "current-password"} type="password" placeholder="Mínimo 6 caracteres" minLength={6} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /></label>
-            {authMode === "register" && <label>Confirmar contraseña<input autoComplete="new-password" type="password" placeholder="Escribe de nuevo tu contraseña" minLength={6} value={authPasswordConfirm} onChange={(e) => setAuthPasswordConfirm(e.target.value)} required /></label>}
-            {authMessage && <p className="auth-feedback" role="status">{authMessage}</p>}
-            {!isSupabaseConfigured && <p className="auth-feedback">El servicio de cuentas aún no está configurado.</p>}
-            <button className="auth-submit" type="submit" disabled={authBusy || !isSupabaseConfigured}>{authBusy ? "Un momento…" : authMode === "register" ? "Crear mi cuenta" : "Iniciar sesión"}<span>→</span></button>
-          </form>
-          <div className="auth-switch">
-            {authMode === "register" ? "¿Ya tienes una cuenta?" : "¿Aún no tienes cuenta?"}
-            <button type="button" onClick={() => { setAuthMode(authMode === "register" ? "login" : "register"); setAuthMessage(""); }}> {authMode === "register" ? "Inicia sesión" : "Regístrate gratis"}</button>
-          </div>
-          <p className="auth-legal">Al continuar, aceptas utilizar Signari de forma respetuosa y responsable.</p>
-        </div>
-        <p className="auth-footer">Un espacio para aprender y construir comunidad.</p>
-      </section>
+        <div className="auth-card-intro"><h1>{authMode === "register" ? "Crea tu cuenta en Signari" : "Inicia sesión en Signari"}</h1><p>{authMode === "register" ? "Comienza a gestionar tus documentos de forma segura y eficiente." : "Entra para continuar con tu espacio de aprendizaje."}</p></div>
+        <form className="auth-form" onSubmit={submitAuth}>
+          {authMode === "register" && <>
+            <label>Nombre completo<span className="auth-input-wrap"><span className="auth-field-icon">♙</span><input autoComplete="name" placeholder="Juan Pérez" value={authName} onChange={(e) => setAuthName(e.target.value)} required /></span></label>
+            <label>Correo electrónico<span className="auth-input-wrap"><span className="auth-field-icon">✉</span><input autoComplete="email" type="email" placeholder="juan.perez@empresa.com" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required /></span></label>
+            <label>Empresa <span className="auth-optional">(opcional)</span><span className="auth-input-wrap"><span className="auth-field-icon">▤</span><input autoComplete="organization" placeholder="Signari Tech SA" value={authCompany} onChange={(e) => setAuthCompany(e.target.value)} /></span></label>
+            <label>Contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="new-password" type={showAuthPassword ? "text" : "password"} placeholder="••••••••" minLength={6} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /><button className="auth-eye" type="button" aria-label="Mostrar u ocultar contraseña" onClick={() => setShowAuthPassword(!showAuthPassword)}>◉</button></span></label>
+            <label>Confirmar contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="new-password" type={showAuthPasswordConfirm ? "text" : "password"} placeholder="••••••••" minLength={6} value={authPasswordConfirm} onChange={(e) => setAuthPasswordConfirm(e.target.value)} required /><button className="auth-eye" type="button" aria-label="Mostrar u ocultar contraseña" onClick={() => setShowAuthPasswordConfirm(!showAuthPasswordConfirm)}>◉</button></span></label>
+            <label className="auth-terms"><input type="checkbox" checked={authAcceptedTerms} onChange={(e) => setAuthAcceptedTerms(e.target.checked)} required /><span>He leído y acepto los <a href="#terminos" onClick={(e) => e.preventDefault()}>Términos de Servicio</a> y la <a href="#privacidad" onClick={(e) => e.preventDefault()}>Política de Privacidad</a>.</span></label>
+          </>}
+          {authMode === "login" && <>
+            <label>Correo electrónico<span className="auth-input-wrap"><span className="auth-field-icon">✉</span><input autoComplete="email" type="email" placeholder="juan.perez@empresa.com" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required /></span></label>
+            <label>Contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="current-password" type={showAuthPassword ? "text" : "password"} placeholder="Tu contraseña" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /><button className="auth-eye" type="button" onClick={() => setShowAuthPassword(!showAuthPassword)}>◉</button></span></label>
+          </>}
+          {authMessage && <p className="auth-feedback" role="status">{authMessage}</p>}
+          {!isSupabaseConfigured && <p className="auth-feedback">El servicio de cuentas aún no está configurado.</p>}
+          <button className="auth-submit" type="submit" disabled={authBusy || !isSupabaseConfigured}>{authBusy ? "Un momento…" : authMode === "register" ? "Crear Cuenta" : "Iniciar Sesión"}<span>→</span></button>
+        </form>
+        <div className="auth-switch">{authMode === "register" ? "Already have an account?" : "¿Aún no tienes cuenta?"}<button type="button" onClick={() => { setAuthMode(authMode === "register" ? "login" : "register"); setAuthMessage(""); }}> {authMode === "register" ? "Iniciar Sesión" : "Crear cuenta"}</button></div>
+        {authMode === "register" && <div className="auth-social"><div className="auth-divider"><span>Or sign up with</span></div><div className="auth-social-row"><button type="button" disabled title="Google estará disponible cuando configuremos el proveedor en Supabase"><b className="google-mark">G</b>Google</button><button type="button" disabled title="LinkedIn estará disponible cuando configuremos el proveedor en Supabase"><b className="linkedin-mark">in</b>LinkedIn</button></div><p>Registro con Google y LinkedIn próximamente.</p></div>}
+      </div></section>
     </main>
   );
 
