@@ -73,8 +73,8 @@ Consulta la documentación de arquitectura en `documentacion/arquitectura/README
 - [x] Práctica de conocimientos con revisión de respuestas.
 - [x] Seguimiento de avance guardado localmente en el navegador.
 - [ ] Contenido visual de alfabeto y vocabulario, pendiente de fuentes y validación especializada.
-- [ ] Cuentas, base de datos y sincronización entre dispositivos con Supabase.
+- [x] Esquema inicial de perfiles y progreso con políticas RLS preparado para Supabase.\n- [ ] Crear el proyecto Supabase, ejecutar la migración y conectar cuentas y sincronización.
 - [ ] Aplicación Android con Capacitor.
 - [ ] Panel administrativo, publicidad y Premium.
 
-El progreso actual se almacena en el dispositivo y todavía no se sincroniza entre la web y Android. Esta versión es una base funcional de aprendizaje, no la plataforma final.
+El esquema de base de datos está preparado, pero todavía no hay un proyecto Supabase conectado. El progreso actual se almacena en el dispositivo y todavía no se sincroniza entre la web y Android. Esta versión es una base funcional de aprendizaje, no la plataforma final.
