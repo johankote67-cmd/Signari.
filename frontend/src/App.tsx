@@ -134,8 +134,18 @@ export default function App() {
       : await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
     setAuthBusy(false);
     if (result.error) { setAuthMessage(result.error.message); return; }
-    if (authMode === "register" && !result.data.session) setAuthMessage("Cuenta creada. Revisa tu correo para confirmar el registro.");
-    else setAuthMessage("Sesión iniciada. Tu progreso se sincronizará automáticamente.");
+    if (authMode === "register") {
+      if (result.data.session?.user) {
+        setAuthUser({ id: result.data.session.user.id, email: result.data.session.user.email });
+        setAuthMessage("¡Cuenta creada! Entrando a Signari…");
+        setAuthPassword("");
+        setAuthPasswordConfirm("");
+      } else {
+        setAuthMessage("Tu cuenta fue creada. Para entrar automáticamente, desactiva la confirmación de correo en Supabase; mientras esté activa, revisa tu bandeja de entrada para confirmar el registro.");
+      }
+    } else {
+      setAuthMessage("Sesión iniciada. Tu progreso se sincronizará automáticamente.");
+    }
   }
 
   async function signOut() {
