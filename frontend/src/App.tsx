@@ -89,6 +89,7 @@ export default function App() {
   const [authAcceptedTerms, setAuthAcceptedTerms] = useState(false);
   const [showAuthPassword, setShowAuthPassword] = useState(false);
   const [showAuthPasswordConfirm, setShowAuthPasswordConfirm] = useState(false);
+  const [authLegalView, setAuthLegalView] = useState<"terms" | "privacy" | null>(null);
   const [authMessage, setAuthMessage] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
   const [cloudReady, setCloudReady] = useState(false);
@@ -153,6 +154,22 @@ export default function App() {
     }
   }
 
+  async function signInWithProvider(provider: "google" | "linkedin_oidc") {
+    if (!supabase) { setAuthMessage("La conexión de cuentas no está disponible."); return; }
+    setAuthBusy(true); setAuthMessage("");
+    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin } });
+    if (error) { setAuthBusy(false); setAuthMessage(provider === "google" ? "No se pudo iniciar con Google. Comprueba su configuración en Supabase." : "No se pudo iniciar con LinkedIn. Comprueba su configuración en Supabase."); }
+  }
+
+  async function sendPasswordReset() {
+    if (!supabase) { setAuthMessage("La conexión de cuentas no está disponible."); return; }
+    if (!authEmail.trim()) { setAuthMessage("Escribe tu correo electrónico para enviarte el enlace de recuperación."); return; }
+    setAuthBusy(true); setAuthMessage("");
+    const { error } = await supabase.auth.resetPasswordForEmail(authEmail.trim(), { redirectTo: window.location.origin });
+    setAuthBusy(false);
+    setAuthMessage(error ? error.message : "Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña.");
+  }
+
   async function signOut() {
     if (!supabase) return;
     const { error } = await supabase.auth.signOut();
@@ -202,18 +219,19 @@ export default function App() {
             <label>Empresa <span className="auth-optional">(opcional)</span><span className="auth-input-wrap"><span className="auth-field-icon">▤</span><input autoComplete="organization" placeholder="Signari Tech SA" value={authCompany} onChange={(e) => setAuthCompany(e.target.value)} /></span></label>
             <label>Contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="new-password" type={showAuthPassword ? "text" : "password"} placeholder="••••••••" minLength={6} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /><button className="auth-eye" type="button" aria-label="Mostrar u ocultar contraseña" onClick={() => setShowAuthPassword(!showAuthPassword)}>◉</button></span></label>
             <label>Confirmar contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="new-password" type={showAuthPasswordConfirm ? "text" : "password"} placeholder="••••••••" minLength={6} value={authPasswordConfirm} onChange={(e) => setAuthPasswordConfirm(e.target.value)} required /><button className="auth-eye" type="button" aria-label="Mostrar u ocultar contraseña" onClick={() => setShowAuthPasswordConfirm(!showAuthPasswordConfirm)}>◉</button></span></label>
-            <label className="auth-terms"><input type="checkbox" checked={authAcceptedTerms} onChange={(e) => setAuthAcceptedTerms(e.target.checked)} required /><span>He leído y acepto los <a href="#terminos" onClick={(e) => e.preventDefault()}>Términos de Servicio</a> y la <a href="#privacidad" onClick={(e) => e.preventDefault()}>Política de Privacidad</a>.</span></label>
+            <label className="auth-terms"><input type="checkbox" checked={authAcceptedTerms} onChange={(e) => setAuthAcceptedTerms(e.target.checked)} required /><span>He leído y acepto los <a href="#terminos" onClick={(e) => { e.preventDefault(); setAuthLegalView("terms"); }}>Términos de Servicio</a> y la <a href="#privacidad" onClick={(e) => { e.preventDefault(); setAuthLegalView("privacy"); }}>Política de Privacidad</a>.</span></label>
           </>}
           {authMode === "login" && <>
             <label>Correo electrónico<span className="auth-input-wrap"><span className="auth-field-icon">✉</span><input autoComplete="email" type="email" placeholder="juan.perez@empresa.com" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required /></span></label>
             <label>Contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="current-password" type={showAuthPassword ? "text" : "password"} placeholder="Tu contraseña" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /><button className="auth-eye" type="button" onClick={() => setShowAuthPassword(!showAuthPassword)}>◉</button></span></label>
           </>}
+          {authMode === "login" && <button className="auth-forgot" type="button" onClick={sendPasswordReset} disabled={authBusy}>¿Olvidaste tu contraseña?</button>}
           {authMessage && <p className="auth-feedback" role="status">{authMessage}</p>}
           {!isSupabaseConfigured && <p className="auth-feedback">El servicio de cuentas aún no está configurado.</p>}
           <button className="auth-submit" type="submit" disabled={authBusy || !isSupabaseConfigured}>{authBusy ? "Un momento…" : authMode === "register" ? "Crear Cuenta" : "Iniciar Sesión"}<span>→</span></button>
         </form>
         <div className="auth-switch">{authMode === "register" ? "Already have an account?" : "¿Aún no tienes cuenta?"}<button type="button" onClick={() => { setAuthMode(authMode === "register" ? "login" : "register"); setAuthMessage(""); }}> {authMode === "register" ? "Iniciar Sesión" : "Crear cuenta"}</button></div>
-        {authMode === "register" && <div className="auth-social"><div className="auth-divider"><span>Or sign up with</span></div><div className="auth-social-row"><button type="button" disabled title="Google estará disponible cuando configuremos el proveedor en Supabase"><b className="google-mark">G</b>Google</button><button type="button" disabled title="LinkedIn estará disponible cuando configuremos el proveedor en Supabase"><b className="linkedin-mark">in</b>LinkedIn</button></div><p>Registro con Google y LinkedIn próximamente.</p></div>}
+        {authMode === "register" && <div className="auth-social"><div className="auth-divider"><span>Or sign up with</span></div><div className="auth-social-row"><button type="button" onClick={() => signInWithProvider("google")} disabled={authBusy || !isSupabaseConfigured}><b className="google-mark">G</b>Google</button><button type="button" onClick={() => signInWithProvider("linkedin_oidc")} disabled={authBusy || !isSupabaseConfigured}><b className="linkedin-mark">in</b>LinkedIn</button></div><p>Si un proveedor no está configurado en Supabase, aparecerá un aviso.</p></div>}
       </div></section>
     </main>
   );
