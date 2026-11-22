@@ -136,7 +136,7 @@ export default function App() {
     if (authMode === "register" && !authAcceptedTerms) { setAuthMessage("Debes aceptar los Términos de Servicio y la Política de Privacidad."); return; }
     setAuthBusy(true); setAuthMessage("");
     const result = authMode === "register"
-      ? await supabase.auth.signUp({ email: authEmail, password: authPassword, options: { data: { display_name: authName, company: authCompany } } })
+      ? await supabase.auth.signUp({ email: authEmail, password: authPassword, options: { data: { display_name: authName, company: authCompany, terms_accepted_at: new Date().toISOString() } } })
       : await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
     setAuthBusy(false);
     if (result.error) { setAuthMessage(result.error.message); return; }
