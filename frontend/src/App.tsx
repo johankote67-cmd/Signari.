@@ -174,6 +174,13 @@ export default function App() {
 
   if (!authUser) return (
     <main className="auth-screen">
+      <div className="auth-topbar">
+        <button className="auth-download" type="button" disabled aria-label="Descargar aplicación Android: próximamente" title="La aplicación Android estará disponible cuando terminemos y publiquemos la APK.">
+          <span className="auth-download-icon" aria-hidden="true">↓</span>
+          <span>Descargar aplicación</span>
+          <small>Próximamente</small>
+        </button>
+      </div>
       <div className="auth-decoration auth-decoration-one" aria-hidden="true" />
       <div className="auth-decoration auth-decoration-two" aria-hidden="true" />
       <section className="auth-shell">
