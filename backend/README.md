@@ -1,39 +1,37 @@
 # Backend de Signari
 
-El backend centralizará autenticación, perfiles y progreso de aprendizaje.
+El backend centraliza autenticación, perfiles y progreso de aprendizaje mediante Supabase.
 
-## Servicio previsto
+## Proyecto conectado
 
-Supabase:
-- Auth para registro e inicio de sesión.
-- PostgreSQL para perfiles y progreso.
-- Row Level Security (RLS) para que cada cuenta solo pueda consultar y modificar sus propios datos.
-- Storage para recursos multimedia cuando corresponda.
+- Proyecto: `johankote67-cmd's Project`
+- Región: US East (N. Virginia).
+- Estado comprobado: activo y saludable.
+- Migración aplicada: `profiles_and_lesson_progress`.
 
-## Esquema inicial
+## Esquema inicial aplicado
 
 La migración `supabase/migrations/0001_profiles_and_progress.sql` crea:
-- `profiles`: perfil asociado al identificador de Auth.
-- `lesson_progress`: lecciones completadas por usuario.
-- Políticas RLS para lectura, escritura y eliminación limitadas al propietario.
-- Un trigger que crea el perfil al registrar una cuenta.
 
-Las tablas no son públicas: las operaciones requieren una sesión autenticada. La clave pública del cliente no sustituye RLS.
+- `profiles`: perfil asociado al identificador de Supabase Auth.
+- `lesson_progress`: lecciones completadas por usuario.
+- Políticas RLS de lectura, inserción, actualización y eliminación limitadas al propietario.
+- Trigger interno que crea el perfil al registrar una cuenta.
+- Trigger que mantiene actualizado `updated_at`.
+
+Las dos tablas tienen RLS habilitado. Las funciones internas del trigger no se pueden invocar desde los roles públicos de la API.
 
 ## Variables del frontend
 
-Copia `frontend/.env.example` como `frontend/.env.local` y configura:
+El cliente usa estas variables:
+
 - `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY` (o publishable key compatible del proyecto)
+- `VITE_SUPABASE_ANON_KEY` (puede contener la publishable key moderna `sb_publishable_...`).
 
-No uses nunca la clave `service_role` en el navegador, en Android ni en GitHub. No subas archivos `.env.local`.
+Para desarrollo local, copia `frontend/.env.example` como `frontend/.env.local` y completa los valores desde la configuración API del proyecto. En el despliegue web, define las mismas variables en el panel de Netlify; para Android, configura el entorno de compilación correspondiente.
 
-## Activación pendiente
+No uses nunca la clave `service_role` ni una secret key en navegador, Android o GitHub. No subas archivos `.env.local`.
 
-1. Crear un proyecto Supabase.
-2. Ejecutar la migración SQL en el SQL Editor.
-3. Copiar URL y clave pública a `frontend/.env.local`.
-4. Implementar y probar registro, inicio/cierre de sesión y sincronización.
-5. Configurar políticas adicionales y revisar privacidad antes de datos reales.
+## Estado
 
-Todavía no existe una conexión activa a un proyecto Supabase. El progreso de la interfaz continúa guardándose localmente hasta completar y probar la integración de cuentas.
+La base de datos ya está creada y la migración inicial está aplicada y verificada. El siguiente trabajo es integrar registro, inicio/cierre de sesión y sincronización del progreso en el frontend, conservando el modo local cuando no haya configuración.
