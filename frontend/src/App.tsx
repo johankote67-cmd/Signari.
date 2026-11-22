@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
+import { supabase, isSupabaseConfigured } from "./lib/supabase";
 
 type Lesson = { id: string; title: string; duration: string; summary: string; sections: { heading: string; body: string }[]; pending?: boolean };
 type Module = { id: string; title: string; level: string; description: string; icon: string; lessons: Lesson[] };
@@ -77,8 +78,68 @@ export default function App() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [authUser, setAuthUser] = useState<{ id: string; email?: string } | null>(null);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authName, setAuthName] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [cloudReady, setCloudReady] = useState(false);
 
   useEffect(() => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(completed)); } catch { /* El progreso sigue disponible durante esta sesión. */ } }, [completed]);
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => setAuthUser(data.session?.user ? { id: data.session.user.id, email: data.session.user.email } : null));
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
+      setCloudReady(false);
+      setAuthMessage("");
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!supabase || !authUser) { setCloudReady(false); return; }
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.from("lesson_progress").select("lesson_id").eq("user_id", authUser.id);
+      if (cancelled) return;
+      if (error) { setAuthMessage("No se pudo cargar el progreso en la nube. Tu avance local se conserva."); setCloudReady(true); return; }
+      const cloudIds = (data ?? []).map((row) => row.lesson_id);
+      setCompleted((current) => Array.from(new Set([...current, ...cloudIds])));
+      setCloudReady(true);
+    })();
+    return () => { cancelled = true; };
+  }, [authUser?.id]);
+
+  useEffect(() => {
+    if (!supabase || !authUser || !cloudReady || completed.length === 0) return;
+    const rows = completed.map((lesson_id) => ({ user_id: authUser.id, lesson_id }));
+    supabase.from("lesson_progress").upsert(rows, { onConflict: "user_id,lesson_id" })
+      .then(({ error }) => { if (error) setAuthMessage("No se pudo sincronizar el progreso. Se mantiene guardado en este dispositivo."); });
+  }, [completed, authUser?.id, cloudReady]);
+
+  async function submitAuth(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!supabase) return;
+    setAuthBusy(true); setAuthMessage("");
+    const result = authMode === "register"
+      ? await supabase.auth.signUp({ email: authEmail, password: authPassword, options: { data: { display_name: authName } } })
+      : await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
+    setAuthBusy(false);
+    if (result.error) { setAuthMessage(result.error.message); return; }
+    if (authMode === "register" && !result.data.session) setAuthMessage("Cuenta creada. Revisa tu correo para confirmar el registro.");
+    else setAuthMessage("Sesión iniciada. Tu progreso se sincronizará automáticamente.");
+  }
+
+  async function signOut() {
+    if (!supabase) return;
+    const { error } = await supabase.auth.signOut();
+    setAuthMessage(error ? error.message : "Sesión cerrada.");
+    setAuthUser(null); setCloudReady(false);
+  }
 
   const activeModule = modules.find((item) => item.id === activeModuleId) ?? modules[0];
   const activeLesson = activeModule.lessons.find((item) => item.id === activeLessonId) ?? activeModule.lessons[0];
@@ -114,7 +175,9 @@ export default function App() {
         <button className={`nav-item ${view === "practice" ? "active" : ""}`} onClick={startPractice}><span>✎</span> Practicar</button>
         <div className="side-label modules-label">MÓDULOS</div>
         <div className="module-nav">{modules.map((module) => <button key={module.id} className={`module-nav-item ${activeModuleId === module.id ? "selected" : ""}`} onClick={() => openModule(module)}><span className="module-icon">{module.icon}</span><span className="module-nav-copy">{module.title}<small>{moduleProgress[module.id]}/{module.lessons.length} lecciones</small></span></button>)}</div>
-        <div className="sidebar-bottom"><div className="mini-progress"><div className="mini-progress-top"><span>Tu avance</span><strong>{progress}%</strong></div><div className="progress-track"><span style={{ width: `${progress}%` }} /></div></div><p>Aprender también es construir comunidad.</p></div>
+        <div className="sidebar-account">
+          {!isSupabaseConfigured ? <><strong>Cuenta Signari</strong><p>La conexión de cuenta se activará al configurar las variables públicas de Supabase.</p></> : authUser ? <><strong>Sesión conectada</strong><p>{authUser.email}</p><button className="account-button" onClick={signOut}>Cerrar sesión</button><small>{cloudReady ? "Progreso sincronizado" : "Conectando progreso…"}</small></> : <form onSubmit={submitAuth}><strong>{authMode === "login" ? "Iniciar sesión" : "Crear cuenta"}</strong>{authMode === "register" && <input aria-label="Nombre" placeholder="Nombre" value={authName} onChange={(e) => setAuthName(e.target.value)} required />}<input aria-label="Correo electrónico" type="email" placeholder="Correo electrónico" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required /><input aria-label="Contraseña" type="password" placeholder="Contraseña" minLength={6} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /><button className="account-button" type="submit" disabled={authBusy}>{authBusy ? "Espera…" : authMode === "login" ? "Entrar" : "Registrarme"}</button><button className="account-mode" type="button" onClick={() => { setAuthMode(authMode === "login" ? "register" : "login"); setAuthMessage(""); }}>{authMode === "login" ? "Crear una cuenta" : "Ya tengo cuenta"}</button>{authMessage && <small role="status">{authMessage}</small>}</form>}
+        </div><div className="sidebar-bottom"><div className="mini-progress"><div className="mini-progress-top"><span>Tu avance</span><strong>{progress}%</strong></div><div className="progress-track"><span style={{ width: `${progress}%` }} /></div></div><p>Aprender también es construir comunidad.</p></div>
       </aside>
 
       <main className="main-area">
