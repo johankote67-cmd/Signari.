@@ -12,3 +12,107 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 .sidebar-account{margin-top:auto;margin-bottom:15px;padding:12px 10px;border:1px solid #eee9f4;border-radius:12px;background:#fbfaff}.sidebar-account strong{display:block;margin-bottom:7px;color:#554078;font-size:11px}.sidebar-account p,.sidebar-account small{display:block;margin:5px 0;color:#8f879a;font-size:9px;line-height:1.5}.sidebar-account form{display:grid;gap:7px}.sidebar-account input{width:100%;min-width:0;padding:8px 9px;border:1px solid #e8e2ef;border-radius:7px;background:#fff;color:#443a53;font:10px "DM Sans",sans-serif}.account-button{padding:8px;border:0;border-radius:7px;background:#6941c6;color:#fff;font-size:10px;font-weight:700}.account-button:disabled{opacity:.6}.account-mode{border:0;background:transparent;color:#7555b8;font-size:9px;text-align:left}
 @media(max-width:780px){.sidebar-account{margin-top:15px}}
+
+
+/* Refinamiento visual y accesibilidad del panel lateral */
+:root{
+  color-scheme:light;
+  --signari-ink:#241b35;
+  --signari-muted:#81788f;
+  --signari-purple:#6840bd;
+  --signari-purple-dark:#50309d;
+  --signari-line:#eae5f1;
+  --signari-surface:#fff;
+}
+html{scroll-behavior:smooth}
+body{background:#f7f5fa;color:var(--signari-ink)}
+.sidebar{
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#d9cdea transparent;
+  box-shadow:8px 0 30px rgba(43,25,75,.035);
+}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-thumb{border-radius:8px;background:#ded5eb}
+.brand{margin-bottom:34px}
+.sidebar-account{
+  flex-shrink:0;
+  margin-top:24px;
+  margin-bottom:8px;
+  padding:15px 12px;
+  border:1px solid #e8e0f3;
+  border-radius:14px;
+  background:linear-gradient(145deg,#fbf9ff,#f5f0fc);
+  box-shadow:0 5px 18px rgba(75,48,122,.045);
+}
+.sidebar-account strong{font:800 12px Manrope,sans-serif;color:#4f347f}
+.sidebar-account form{gap:9px}
+.sidebar-account input{
+  min-height:39px;
+  padding:9px 11px;
+  border:1px solid #e4ddec;
+  border-radius:9px;
+  background:#fff;
+  font-size:11px;
+  transition:border-color .18s,box-shadow .18s;
+}
+.sidebar-account input:focus{outline:none;border-color:#9b7bd0;box-shadow:0 0 0 3px #8b69c51c}
+.account-button{min-height:38px;border-radius:9px;background:linear-gradient(135deg,#7650c8,#5936a9);box-shadow:0 5px 12px #6840bd22}
+.account-button:hover{background:var(--signari-purple-dark)}
+.account-mode{padding:5px 2px;font-size:10px}
+.sidebar-account small[role=status]{padding:8px;border-radius:8px;background:#fff;color:#675879;font-size:10px;overflow-wrap:anywhere}
+.sidebar-bottom{flex-shrink:0;margin-top:18px}
+.main-area{background:linear-gradient(180deg,#fbfaff 0,#f8f7fb 360px,#f7f5fa 100%)}
+.app-header{box-shadow:0 3px 16px rgba(38,25,61,.025)}
+.content-wrap{max-width:1120px;padding-top:42px}
+.welcome-panel{
+  min-height:278px;
+  border-color:#e8def7;
+  background:radial-gradient(circle at 82% 45%,#e9defa 0,transparent 29%),linear-gradient(115deg,#f1eaff 0%,#faf8ff 57%,#f0e9fb 100%);
+  box-shadow:0 12px 34px rgba(81,51,135,.055);
+}
+.welcome-panel h1{letter-spacing:-2.2px}
+.welcome-panel>div:first-child>p:not(.eyebrow){font-size:14px}
+.button-primary,.button-secondary{min-height:44px;border-radius:11px;font-size:12px}
+.button-primary{background:linear-gradient(135deg,#7952ca,#5e39b0)}
+.progress-overview,.module-card,.practice-banner,.aside-card,.quiz-card,.lesson-complete{
+  border-color:#ebe6f1;
+  box-shadow:0 7px 24px rgba(42,28,66,.035);
+}
+.progress-overview{padding:25px 29px}
+.module-card{padding:22px;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.module-card:hover{transform:translateY(-3px);border-color:#dcd0ef;box-shadow:0 12px 28px rgba(75,48,122,.08)}
+.module-card h3{font-size:17px}
+.module-card>p{font-size:12px}
+.module-card-icon{width:43px;height:43px}
+.status-tag{font-size:10px}
+.practice-banner{padding:19px 21px}
+.practice-symbol{width:42px;height:42px;flex-basis:42px}
+.lesson-title{letter-spacing:-1.9px}
+.lesson-section{padding:24px 0}
+.lesson-section p{font-size:13px}
+.answer-option{min-height:47px;border-radius:11px;transition:border-color .16s,background .16s}
+.answer-option:hover{border-color:#cdbce8;background:#fbf9ff}
+.result-card{box-shadow:0 12px 35px rgba(42,28,66,.06)}
+.mobile-menu{width:34px;height:34px;border-radius:9px}
+.mobile-menu:hover{background:#f2edfa}
+@media(min-width:781px){
+  .sidebar{width:276px;padding:25px 18px 18px}
+  .main-area{margin-left:276px}
+  .content-wrap{padding-right:48px;padding-left:48px}
+}
+@media(max-width:780px){
+  .sidebar{z-index:30;max-height:100dvh;padding-bottom:24px}
+  .sidebar-account{margin-top:20px}
+  .sidebar-bottom{margin-top:16px}
+  .content-wrap{padding-top:25px}
+  .welcome-panel{box-shadow:0 8px 24px rgba(81,51,135,.05)}
+}
+@media(max-width:540px){
+  .welcome-panel{gap:4px}
+  .welcome-panel h1{font-size:32px;letter-spacing:-1.7px}
+  .progress-overview{gap:10px}
+  .module-card{padding:19px}
+  .sidebar-account{padding:14px}
+}
