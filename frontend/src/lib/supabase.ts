@@ -1,14 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Esta clave es pública (publishable) y está protegida por las políticas RLS.
+// Nunca sustituirla por una secret key o service_role.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://msyolwcfpfflofkahxsy.supabase.co";
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_F_MR179iELde4HeEGpsmmQ_JKJ99F4T";
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
-/**
- * La clave anon/publishable está diseñada para el cliente y siempre debe
- * estar protegida por políticas RLS. Nunca colocar aquí la service_role key.
- */
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
