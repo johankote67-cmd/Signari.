@@ -75,7 +75,8 @@ npm run dev
 - [x] Migración inicial aplicada y verificada.
 - [ ] Integrar y probar registro, inicio/cierre de sesión y sincronización web/Android.
 - [ ] Completar contenido visual LSM con fuentes y revisión especializada.
-- [ ] Aplicación Android con Capacitor.
+- [x] Dependencias y configuración inicial de Capacitor para Android.\n- [x] Flujo de GitHub Actions para generar un APK de depuración descargable como artefacto.\n- [ ] Generar y probar el APK en un dispositivo Android.
 - [ ] Panel administrativo, publicidad y Premium.
 
 La base de datos está lista para comenzar la integración de cuentas y sincronización. La interfaz todavía conserva el progreso local; no afirmar que la sincronización entre dispositivos está activa hasta implementarla y probarla.
+\n## Aplicación Android\n\nLa app reutiliza el frontend web con Capacitor y el identificador `com.signari.app`. El flujo **Android APK** de GitHub Actions genera un APK de depuración cuando se actualiza `frontend/` en `main` o al ejecutarlo manualmente desde Actions. El APK se publica como artefacto temporal durante 14 días; todavía no es una versión firmada para distribución pública.\n
