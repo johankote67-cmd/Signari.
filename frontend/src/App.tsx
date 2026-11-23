@@ -65,6 +65,18 @@ const questions = [
 
 const STORAGE_KEY = "signari-progress-v1";
 
+function authErrorMessage(message: string): string {
+  const normalized = message.toLowerCase();
+  if (normalized.includes("user already registered")) return "Ya existe una cuenta con este correo. Inicia sesión o recupera tu contraseña.";
+  if (normalized.includes("invalid login credentials")) return "El correo o la contraseña son incorrectos.";
+  if (normalized.includes("email not confirmed")) return "Primero confirma tu correo desde el enlace que te enviamos.";
+  if (normalized.includes("password should be at least")) return "La contraseña no cumple con la longitud mínima requerida.";
+  if (normalized.includes("email rate limit exceeded")) return "Se alcanzó el límite temporal de correos. Espera un momento e inténtalo de nuevo.";
+  if (normalized.includes("invalid email") || normalized.includes("email address is invalid")) return "Escribe una dirección de correo válida.";
+  if (normalized.includes("weak password")) return "Elige una contraseña más segura.";
+  return message;
+}
+
 function readProgress(): string[] {
   try { const value = localStorage.getItem(STORAGE_KEY); return value ? JSON.parse(value) as string[] : []; }
   catch { return []; }
@@ -86,7 +98,7 @@ export default function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [authName, setAuthName] = useState("");
   const [authCompany, setAuthCompany] = useState("");
-  const [authAcceptedTerms, setAuthAcceptedTerms] = useState(false);
+  const [authAcceptedTerms, setAuthAcceptedTerms] = useState(false);\n  const [authRecoveryMode, setAuthRecoveryMode] = useState(false);
   const [showAuthPassword, setShowAuthPassword] = useState(false);
   const [showAuthPasswordConfirm, setShowAuthPasswordConfirm] = useState(false);
   const [authLegalView, setAuthLegalView] = useState<"terms" | "privacy" | null>(null);
@@ -132,14 +144,23 @@ export default function App() {
   async function submitAuth(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!supabase) { setAuthMessage("La conexión de cuentas no está disponible en este momento."); return; }
-    if (authMode === "register" && authPassword !== authPasswordConfirm) { setAuthMessage("Las contraseñas no coinciden."); return; }
+    if ((authMode === "register" || authRecoveryMode) && authPassword !== authPasswordConfirm) { setAuthMessage("Las contraseñas no coinciden."); return; }
     if (authMode === "register" && !authAcceptedTerms) { setAuthMessage("Debes aceptar los Términos de Servicio y la Política de Privacidad."); return; }
     setAuthBusy(true); setAuthMessage("");
+    if (authRecoveryMode) {
+      const { error } = await supabase.auth.updateUser({ password: authPassword });
+      setAuthBusy(false);
+      if (error) { setAuthMessage(authErrorMessage(error.message)); return; }
+      setAuthRecoveryMode(false);
+      setAuthPassword(""); setAuthPasswordConfirm("");
+      setAuthMessage("Tu contraseña se actualizó correctamente. Ya puedes continuar en Signari.");
+      return;
+    }
     const result = authMode === "register"
-      ? await supabase.auth.signUp({ email: authEmail, password: authPassword, options: { data: { display_name: authName, company: authCompany, terms_accepted_at: new Date().toISOString() } } })
-      : await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
+      ? await supabase.auth.signUp({ email: authEmail.trim(), password: authPassword, options: { data: { display_name: authName.trim(), institution: authCompany.trim(), terms_accepted_at: new Date().toISOString() } } })
+      : await supabase.auth.signInWithPassword({ email: authEmail.trim(), password: authPassword });
     setAuthBusy(false);
-    if (result.error) { setAuthMessage(result.error.message); return; }
+    if (result.error) { setAuthMessage(authErrorMessage(result.error.message)); return; }
     if (authMode === "register") {
       if (result.data.session?.user) {
         setAuthUser({ id: result.data.session.user.id, email: result.data.session.user.email });
@@ -158,7 +179,7 @@ export default function App() {
     if (!supabase) { setAuthMessage("La conexión de cuentas no está disponible."); return; }
     setAuthBusy(true); setAuthMessage("");
     const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin, queryParams: provider === "google" ? { prompt: "select_account" } : undefined } });
-    if (error) { setAuthBusy(false); setAuthMessage(provider === "google" ? "No se pudo iniciar con Google. Comprueba su configuración en Supabase." : "No se pudo iniciar con LinkedIn. Comprueba su configuración en Supabase."); }
+    if (error) { setAuthBusy(false); setAuthMessage(provider === "google" ? "Google todavía no está conectado en el servicio de cuentas. Puedes registrarte con correo mientras terminamos la configuración." : "LinkedIn todavía no está conectado. Puedes registrarte con correo mientras terminamos la configuración."); }
   }
 
   async function sendPasswordReset() {
@@ -204,16 +225,16 @@ export default function App() {
 
   if (!authChecked) return <main className="auth-loading"><span className="auth-brand-mark">S</span><p>Preparando tu espacio Signari…</p></main>;
 
-  if (!authUser) return (
+  if (!authUser || authRecoveryMode) return (
     <main className="auth-screen">
       <div className="auth-facets" aria-hidden="true"><span /><span /><span /><span /><span /><span /></div>
       <section className="auth-shell"><div className="auth-card">
         <a className="auth-brand" href="#registro" aria-label="Signari">
           <span className="auth-brand-mark"><svg viewBox="0 0 42 42" aria-hidden="true"><path d="M29.8 9.2c-2.1-2.3-5-3.4-8.7-3.4-6.1 0-10.2 3.2-10.2 8 0 4.3 3.2 6.2 9.6 7.4l2.2.4c4.4.8 6.1 1.8 6.1 4.1 0 2.6-2.5 4.3-6.7 4.3-4 0-7.2-1.5-9.6-4.5" fill="none" stroke="#21c4d0" strokeWidth="5" strokeLinecap="round"/><path d="M12.2 32.8c2.2 2.3 5.1 3.4 8.8 3.4 6.1 0 10.2-3.2 10.2-8 0-4.3-3.2-6.2-9.6-7.4l-2.2-.4c-4.4-.8-6.1-1.8-6.1-4.1 0-2.6 2.5-4.3 6.7-4.3 4 0 7.2 1.5 9.6 4.5" fill="none" stroke="#3988ff" strokeWidth="5" strokeLinecap="round"/></svg></span><span>SIGNARI</span>
         </a>
-        <div className="auth-card-intro"><h1>{authMode === "register" ? "Crea tu cuenta en Signari" : "Inicia sesión en Signari"}</h1><p>{authMode === "register" ? "Aprende Lengua de Señas Mexicana a tu ritmo y guarda tu progreso en tu cuenta." : "Entra para continuar con tu espacio de aprendizaje."}</p></div>
+        <div className="auth-card-intro"><h1>{authRecoveryMode ? "Crea una nueva contraseña" : authMode === "register" ? "Crea tu cuenta en Signari" : "Inicia sesión en Signari"}</h1><p>{authRecoveryMode ? "Elige una contraseña nueva para recuperar el acceso a tu cuenta." : authMode === "register" ? "Aprende Lengua de Señas Mexicana a tu ritmo y guarda tu progreso en tu cuenta." : "Entra para continuar con tu espacio de aprendizaje."}</p></div>
         <form className="auth-form" onSubmit={submitAuth}>
-          {authMode === "register" && <>
+          {authRecoveryMode && <>\n            <label>Nueva contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="new-password" type={showAuthPassword ? "text" : "password"} placeholder="••••••••" minLength={6} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /><button className="auth-eye" type="button" aria-label="Mostrar u ocultar contraseña" onClick={() => setShowAuthPassword(!showAuthPassword)}>◉</button></span></label>\n            <label>Confirmar nueva contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="new-password" type={showAuthPasswordConfirm ? "text" : "password"} placeholder="••••••••" minLength={6} value={authPasswordConfirm} onChange={(e) => setAuthPasswordConfirm(e.target.value)} required /><button className="auth-eye" type="button" aria-label="Mostrar u ocultar contraseña" onClick={() => setShowAuthPasswordConfirm(!showAuthPasswordConfirm)}>◉</button></span></label>\n          </>}\n          {!authRecoveryMode && authMode === "register" && <>
             <label>Nombre completo<span className="auth-input-wrap"><span className="auth-field-icon">♙</span><input autoComplete="name" placeholder="Juan Pérez" value={authName} onChange={(e) => setAuthName(e.target.value)} required /></span></label>
             <label>Correo electrónico<span className="auth-input-wrap"><span className="auth-field-icon">✉</span><input autoComplete="email" type="email" placeholder="juan.perez@empresa.com" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required /></span></label>
             <label>Institución <span className="auth-optional">(opcional)</span><span className="auth-input-wrap"><span className="auth-field-icon">▤</span><input autoComplete="organization" placeholder="Nombre de tu escuela u organización" value={authCompany} onChange={(e) => setAuthCompany(e.target.value)} /></span></label>
@@ -221,17 +242,17 @@ export default function App() {
             <label>Confirmar contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="new-password" type={showAuthPasswordConfirm ? "text" : "password"} placeholder="••••••••" minLength={6} value={authPasswordConfirm} onChange={(e) => setAuthPasswordConfirm(e.target.value)} required /><button className="auth-eye" type="button" aria-label="Mostrar u ocultar contraseña" onClick={() => setShowAuthPasswordConfirm(!showAuthPasswordConfirm)}>◉</button></span></label>
             <label className="auth-terms"><input type="checkbox" checked={authAcceptedTerms} onChange={(e) => setAuthAcceptedTerms(e.target.checked)} required /><span>He leído y acepto los <a href="#terminos" onClick={(e) => { e.preventDefault(); setAuthLegalView("terms"); }}>Términos de Servicio</a> y la <a href="#privacidad" onClick={(e) => { e.preventDefault(); setAuthLegalView("privacy"); }}>Política de Privacidad</a>.</span></label>
           </>}
-          {authMode === "login" && <>
+          {!authRecoveryMode && authMode === "login" && <>
             <label>Correo electrónico<span className="auth-input-wrap"><span className="auth-field-icon">✉</span><input autoComplete="email" type="email" placeholder="juan.perez@empresa.com" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required /></span></label>
             <label>Contraseña<span className="auth-input-wrap"><span className="auth-field-icon">▣</span><input autoComplete="current-password" type={showAuthPassword ? "text" : "password"} placeholder="Tu contraseña" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /><button className="auth-eye" type="button" onClick={() => setShowAuthPassword(!showAuthPassword)}>◉</button></span></label>
           </>}
-          {authMode === "login" && <button className="auth-forgot" type="button" onClick={sendPasswordReset} disabled={authBusy}>¿Olvidaste tu contraseña?</button>}
+          {!authRecoveryMode && authMode === "login" && <button className="auth-forgot" type="button" onClick={sendPasswordReset} disabled={authBusy}>¿Olvidaste tu contraseña?</button>}
           {authMessage && <p className="auth-feedback" role="status">{authMessage}</p>}
           {!isSupabaseConfigured && <p className="auth-feedback">El servicio de cuentas aún no está configurado.</p>}
           <button className="auth-submit" type="submit" disabled={authBusy || !isSupabaseConfigured}>{authBusy ? "Un momento…" : authMode === "register" ? "Crear Cuenta" : "Iniciar Sesión"}<span>→</span></button>
         </form>
-        <div className="auth-switch">{authMode === "register" ? "¿Ya tienes una cuenta?" : "¿Aún no tienes cuenta?"}<button type="button" onClick={() => { setAuthMode(authMode === "register" ? "login" : "register"); setAuthMessage(""); }}> {authMode === "register" ? "Iniciar Sesión" : "Crear cuenta"}</button></div>
-        {authMode === "register" && <div className="auth-social"><div className="auth-divider"><span>O regístrate con</span></div><div className="auth-social-row"><button type="button" onClick={() => signInWithProvider("google")} disabled={authBusy || !isSupabaseConfigured}><b className="google-mark">G</b>Google</button><button type="button" onClick={() => signInWithProvider("linkedin_oidc")} disabled={authBusy || !isSupabaseConfigured}><b className="linkedin-mark">in</b>LinkedIn</button></div><p>También puedes registrarte con tu correo y contraseña.</p></div>}
+        {!authRecoveryMode && <div className="auth-switch">{authMode === "register" ? "¿Ya tienes una cuenta?" : "¿Aún no tienes cuenta?"}<button type="button" onClick={() => { setAuthMode(authMode === "register" ? "login" : "register"); setAuthMessage(""); }}> {authMode === "register" ? "Iniciar Sesión" : "Crear cuenta"}</button></div>}
+        {!authRecoveryMode && authMode === "register" && <div className="auth-social"><div className="auth-divider"><span>O regístrate con</span></div><div className="auth-social-row"><button type="button" onClick={() => signInWithProvider("google")} disabled={authBusy || !isSupabaseConfigured}><b className="google-mark">G</b>Google</button><button type="button" onClick={() => signInWithProvider("linkedin_oidc")} disabled={authBusy || !isSupabaseConfigured}><b className="linkedin-mark">in</b>LinkedIn</button></div><p>También puedes registrarte con tu correo y contraseña.</p></div>}
       </div></section>
       {authLegalView && <div className="auth-legal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setAuthLegalView(null); }}>
         <section className="auth-legal-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-legal-title">
