@@ -298,13 +298,65 @@ export default function App() {
       <main className="main-area">
         <header className="app-header"><button className="mobile-menu" aria-label="Abrir menú" onClick={() => setMobileMenu(!mobileMenu)}>☰</button><div className="breadcrumb">Signari <span>/</span> {view === "practice" ? "Práctica" : view === "lesson" ? activeModule.title : "Mi aprendizaje"}</div><span className="header-pill">LSM · Nivel inicial</span></header>
 
-        {view === "home" && <div className="content-wrap">
-          <section className="welcome-panel"><div><p className="eyebrow">TU ESPACIO DE APRENDIZAJE</p><h1>Aprender nos <span>conecta.</span></h1><p>Avanza a tu ritmo y descubre la riqueza de la Lengua de Señas Mexicana.</p><button className="button-primary" onClick={() => openLesson(activeModule, activeModule.lessons[0])}>Continuar aprendiendo <span>→</span></button></div><div className="welcome-art" aria-hidden="true"><div className="art-circle">🤟</div><span className="spark spark-a">✦</span><span className="spark spark-b">✧</span></div></section>
-          <section className="progress-overview"><div><div className="section-kicker">TU PROGRESO</div><h2>Todo gran camino empieza con un paso.</h2><p>Has completado {completed.filter((id) => availableLessons.some((lesson) => lesson.id === id)).length} de {availableLessons.length} lecciones disponibles.</p></div><div className="progress-ring" style={{ "--progress": `${progress * 3.6}deg` } as CSSProperties}><div><strong>{progress}%</strong><small>completado</small></div></div></section>
-          <div className="section-heading"><div><div className="section-kicker">RUTA DE APRENDIZAJE</div><h2>Explora los módulos</h2></div><span className="muted-note">{modules.length} módulos</span></div>
-          <section className="module-grid">{modules.map((module, index) => { const done = moduleProgress[module.id]; const percent = Math.round(done / module.lessons.length * 100); return <article className="module-card" key={module.id}><div className="module-card-top"><span className="module-card-icon">{module.icon}</span><span className={module.lessons.some((lesson) => lesson.pending) ? "status-tag pending" : "status-tag"}>{module.level}</span></div><div className="module-index">MÓDULO 0{index + 1}</div><h3>{module.title}</h3><p>{module.description}</p><div className="card-progress-line"><span style={{ width: `${percent}%` }} /></div><div className="card-bottom"><span>{done}/{module.lessons.length} lecciones</span><button onClick={() => openModule(module)}>Explorar <span>→</span></button></div></article>; })}</section>
-          <section className="practice-banner"><div className="practice-symbol">✎</div><div><strong>¿Listo para repasar?</strong><p>Comprueba lo que has aprendido con una práctica breve.</p></div><button className="button-secondary" onClick={startPractice}>Ir a práctica <span>→</span></button></section>
-          <footer className="app-footer">Signari · Proyecto educativo de Lengua de Señas Mexicana <span>Contenido en construcción y revisión continua.</span></footer>
+        {view === "home" && <div className="dashboard-shell">
+          <section className="dashboard-main-column">
+            <section className="dashboard-hero">
+              <div className="dashboard-hero-copy">
+                <span className="dashboard-eyebrow">TU ESPACIO DE APRENDIZAJE</span>
+                <h1>Aprender nos conecta.</h1>
+                <p>Descubre la Lengua de Señas Mexicana y avanza a tu propio ritmo.</p>
+                <button className="dashboard-primary" onClick={() => openLesson(activeModule, activeModule.lessons[0])}>Continuar aprendiendo <span>→</span></button>
+              </div>
+              <div className="dashboard-hero-photo" role="img" aria-label="Persona comunicándose mediante lengua de señas" />
+            </section>
+            <div className="dashboard-section-title">
+              <div><span className="dashboard-eyebrow">RUTA DE APRENDIZAJE</span><h2>Tus módulos</h2><p>Avanza unidad por unidad y construye tus habilidades.</p></div>
+              <span className="dashboard-level">Nivel inicial</span>
+            </div>
+            <section className="dashboard-module-grid">
+              {modules.map((module, index) => {
+                const done = moduleProgress[module.id];
+                const percent = Math.round(done / module.lessons.length * 100);
+                const pending = module.lessons.every((lesson) => lesson.pending);
+                const active = index === 0;
+                return <button type="button" className={`dashboard-module-card ${active ? "is-current" : ""}`} key={module.id} onClick={() => openModule(module)}>
+                  <span className={`dashboard-module-art dashboard-art-${index + 1}`} aria-hidden="true">{index === 0 ? "✋" : index === 1 ? "Aa" : index === 2 ? "◉" : "▤"}</span>
+                  <span className="dashboard-module-state">{pending ? "En preparación" : percent === 100 ? "Completado" : active ? "Continúa aquí" : "Disponible"}</span>
+                  <span className="dashboard-module-number">0{index + 1}</span>
+                  <strong>{module.title}</strong>
+                  <span className="dashboard-module-description">{module.description}</span>
+                  <span className="dashboard-module-progress"><span style={{width:`${percent}%`}} /></span>
+                  <span className="dashboard-module-meta">{done} de {module.lessons.length} lecciones <span>{percent}%</span></span>
+                </button>;
+              })}
+            </section>
+            <section className="dashboard-study-banner">
+              <div className="dashboard-study-icon">▣</div>
+              <div><strong>Aprende con contexto</strong><p>Consulta recursos y explicaciones antes de practicar.</p></div>
+              <span className="dashboard-study-note">Contenido en desarrollo</span>
+            </section>
+            <footer className="dashboard-footer">SIGNARI <span>Lengua de Señas Mexicana · Aprende, practica y conecta.</span></footer>
+          </section>
+          <aside className="dashboard-aside">
+            <section className="dashboard-side-card dashboard-progress-card">
+              <div className="dashboard-card-heading"><h3>Tu progreso general</h3><span>Nivel 1</span></div>
+              <div className="dashboard-progress-content">
+                <div className="dashboard-progress-ring" style={{"--dashboard-progress":`${progress * 3.6}deg`} as CSSProperties}><span>{progress}%</span></div>
+                <div><strong>Principiante</strong><p>{completed.filter((id) => availableLessons.some((lesson) => lesson.id === id)).length} / {availableLessons.length} lecciones</p><div className="dashboard-mini-track"><span style={{width:`${progress}%`}} /></div></div>
+              </div>
+              <div className="dashboard-stats"><div><strong>🔥 {completed.length ? "1" : "0"}</strong><span>Racha de días</span></div><div><strong>⚡ {completed.length * 10}</strong><span>XP acumulados</span></div><div><strong>♡ 5</strong><span>Intentos</span></div></div>
+            </section>
+            <section className="dashboard-side-card dashboard-daily-card">
+              <div className="dashboard-card-heading"><h3>Reto de práctica</h3><span>+20 XP</span></div>
+              <div className="dashboard-daily-content"><span className="dashboard-daily-icon">✍</span><div><strong>Refuerza lo aprendido</strong><p>Responde preguntas sobre los fundamentos de LSM.</p></div></div>
+              <button className="dashboard-secondary" onClick={startPractice}>Comenzar práctica <span>→</span></button>
+            </section>
+            <section className="dashboard-side-card dashboard-community-card">
+              <div className="dashboard-card-heading"><h3>Aprendizaje responsable</h3><span>LSM</span></div>
+              <p>El contenido visual de señas se incorporará con fuentes identificables y revisión adecuada. Las imágenes decorativas no sustituyen modelos lingüísticos validados.</p>
+            </section>
+            <section className="dashboard-premium-card"><span className="dashboard-premium-label">SIGNARI PREMIUM</span><h3>Aprende sin anuncios.</h3><p>Apoya el proyecto y disfruta una experiencia sin publicidad en los submódulos.</p><span className="dashboard-premium-soon">Planes próximamente</span></section>
+          </aside>
         </div>}
 
         {view === "lesson" && <div className="content-wrap lesson-wrap"><button className="back-link" onClick={() => setView("home")}>← Volver a módulos</button><div className="lesson-layout"><article className="lesson-main"><div className="section-kicker">{activeModule.title.toUpperCase()}</div><div className="lesson-meta"><span>{activeModule.level}</span><span>·</span><span>{activeLesson.duration}</span></div><h1 className="lesson-title">{activeLesson.title}</h1><p className="lesson-lead">{activeLesson.summary}</p>{activeLesson.pending && <div className="notice-box"><strong>Unidad en preparación</strong><p>Estamos reuniendo material visual con fuentes identificables y revisión especializada. Esta lección no cuenta para tu avance todavía.</p></div>}{activeLesson.sections.map((section, index) => <section className="lesson-section" key={section.heading}><span className="lesson-section-number">0{index + 1}</span><div><h2>{section.heading}</h2><p>{section.body}</p></div></section>)}<div className="lesson-complete">{completed.includes(activeLesson.id) ? <><span className="complete-check">✓</span><div><strong>Lección completada</strong><p>Tu avance quedó guardado en este dispositivo.</p></div></> : <><div><strong>¿Terminaste esta lección?</strong><p>Marca la lección como completada para registrar tu avance.</p></div><button className="button-primary" disabled={activeLesson.pending} onClick={markComplete}>Marcar como completada</button></>}</div></article><aside className="lesson-aside"><div className="aside-card"><div className="section-kicker">EN ESTE MÓDULO</div><h3>{activeModule.title}</h3>{activeModule.lessons.map((lesson, index) => <button key={lesson.id} className={`lesson-list-item ${lesson.id === activeLesson.id ? "current" : ""}`} onClick={() => openLesson(activeModule, lesson)}><span className="lesson-list-number">{completed.includes(lesson.id) ? "✓" : `0${index + 1}`}</span><span>{lesson.title}<small>{lesson.duration}</small></span></button>)}</div><div className="source-note"><strong>Aprendizaje responsable</strong><p>Las unidades con señas y vocabulario visual se publicarán después de verificar sus fuentes y obtener la revisión correspondiente.</p></div></aside></div></div>}
