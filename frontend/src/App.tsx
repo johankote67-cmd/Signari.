@@ -98,7 +98,8 @@ export default function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [authName, setAuthName] = useState("");
   const [authCompany, setAuthCompany] = useState("");
-  const [authAcceptedTerms, setAuthAcceptedTerms] = useState(false);\n  const [authRecoveryMode, setAuthRecoveryMode] = useState(false);
+  const [authAcceptedTerms, setAuthAcceptedTerms] = useState(false);
+  const [authRecoveryMode, setAuthRecoveryMode] = useState(false);
   const [showAuthPassword, setShowAuthPassword] = useState(false);
   const [showAuthPasswordConfirm, setShowAuthPasswordConfirm] = useState(false);
   const [authLegalView, setAuthLegalView] = useState<"terms" | "privacy" | null>(null);
