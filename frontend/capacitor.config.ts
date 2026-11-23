@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: "com.signari.app",
   appName: "Signari",
   webDir: "dist",
-  bundledWebRuntime: false,
 };
 
 export default config;
