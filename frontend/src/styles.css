@@ -270,3 +270,14 @@ body{background:#f7f5fa;color:var(--signari-ink)}
 @media(max-width:780px){.main-area{margin-left:0}.app-header{padding:0 18px}.dashboard-shell{padding:22px 18px 34px}.dashboard-hero{min-height:190px}.dashboard-aside{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.dashboard-shell{padding:16px 13px 28px}.dashboard-hero{min-height:230px;align-items:flex-start}.dashboard-hero-copy{padding:22px 19px}.dashboard-hero-photo{width:100%;opacity:.32;background-position:center}.dashboard-hero:after{background:linear-gradient(90deg,#0b1c2c 0%,rgba(9,27,43,.82) 70%,rgba(9,27,43,.35) 100%)}.dashboard-hero h1{font-size:27px}.dashboard-section-title{align-items:flex-start;flex-direction:column}.dashboard-module-grid{grid-template-columns:1fr 1fr;gap:9px}.dashboard-module-card{min-height:220px;padding:12px}.dashboard-module-art{width:48px;height:48px;font-size:21px}.dashboard-module-state{top:12px;right:10px;font-size:8px}.dashboard-module-card strong{font-size:12px}.dashboard-module-description{font-size:9px}.dashboard-aside{grid-template-columns:1fr}.dashboard-progress-card{grid-row:auto}.dashboard-study-banner{align-items:flex-start}.dashboard-study-note{max-width:90px}.dashboard-footer{flex-direction:column}.dashboard-footer span{text-align:left}}
 @media(prefers-reduced-motion:reduce){.dashboard-module-card,.dashboard-primary,.dashboard-secondary{transition:none}}
+
+
+/* Fotografías de referencia en las tarjetas de módulos */
+.dashboard-module-art{position:relative;overflow:hidden;isolation:isolate;background:#0a1724;border:1px solid #263d53}
+.dashboard-module-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;filter:saturate(.9) contrast(1.04);transition:transform .35s ease}
+.dashboard-module-card:hover .dashboard-module-art img{transform:scale(1.045)}
+.dashboard-art-1 img{object-position:center 48%}
+.dashboard-art-2 img{object-position:center 52%}
+.dashboard-art-3 img{object-position:center 48%}
+.dashboard-art-4 img{object-position:center 50%}
+@media(prefers-reduced-motion:reduce){.dashboard-module-art img{transition:none}}
