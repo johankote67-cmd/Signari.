@@ -283,12 +283,12 @@ export default function App() {
 
   return (
     <div className="app-layout">
-      <aside className={\`sidebar \${mobileMenu ? "sidebar-open" : ""}\`}>
+      <aside className={`sidebar ${mobileMenu ? "sidebar-open" : ""}`}>
         <a className="brand" href="#inicio" onClick={() => setView("home")}><span className="brand-mark">S</span><span>SIGNARI</span></a>
         <nav className="enterprise-nav" aria-label="Navegación principal">
-          <button className={\`nav-item \${view === "home" ? "active" : ""}\`} onClick={() => { setView("home"); setMobileMenu(false); }}><span aria-hidden="true">▤</span>Aprender</button>
+          <button className={`nav-item ${view === "home" ? "active" : ""}`} onClick={() => { setView("home"); setMobileMenu(false); }}><span aria-hidden="true">▤</span>Aprender</button>
           <button className="nav-item" onClick={() => { setView("home"); setMobileMenu(false); }}><span aria-hidden="true">▥</span>Diccionario LSM</button>
-          <button className={\`nav-item \${view === "practice" ? "active" : ""}\`} onClick={startPractice}><span aria-hidden="true">☷</span>Retos Diarios</button>
+          <button className={`nav-item ${view === "practice" ? "active" : ""}`} onClick={startPractice}><span aria-hidden="true">☷</span>Retos Diarios</button>
           <button className="nav-item" onClick={() => setView("home")}><span aria-hidden="true">♛</span>Premium</button>
           <button className="nav-item" onClick={() => setView("home")}><span aria-hidden="true">♙</span>Perfil</button>
         </nav>
