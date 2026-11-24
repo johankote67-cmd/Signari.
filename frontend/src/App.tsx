@@ -3,11 +3,11 @@ import type { CSSProperties } from "react";
 import { supabase, isSupabaseConfigured } from "./lib/supabase";
 
 type Lesson = { id: string; title: string; duration: string; summary: string; sections: { heading: string; body: string }[]; pending?: boolean };
-type Module = { id: string; title: string; level: string; description: string; icon: string; lessons: Lesson[] };
+type Module = { id: string; title: string; level: string; description: string; icon: string; image: string; lessons: Lesson[] };
 
 const modules: Module[] = [
   {
-    id: "fundamentos", title: "Primeros pasos en LSM", level: "Nivel inicial", description: "Conoce qué es la LSM y cómo acercarte a ella con respeto.", icon: "✦",
+    id: "fundamentos", title: "Primeros pasos en LSM", level: "Nivel inicial", description: "Conoce qué es la LSM y cómo acercarte a ella con respeto.", icon: "✦", image: "https://images.pexels.com/photos/10029301/pexels-photo-10029301.jpeg?auto=compress&cs=tinysrgb&w=600",
     lessons: [
       { id: "que-es-lsm", title: "¿Qué es la LSM?", duration: "5 min", summary: "Una introducción a la Lengua de Señas Mexicana.", sections: [
         { heading: "Una lengua completa", body: "La Lengua de Señas Mexicana (LSM) es una lengua natural de la comunidad sorda en México. Tiene vocabulario, gramática y recursos propios; no es simplemente español representado con las manos." },
@@ -22,7 +22,7 @@ const modules: Module[] = [
     ]
   },
   {
-    id: "comunicacion", title: "Comunicación visual", level: "Nivel inicial", description: "Reconoce elementos que acompañan la comunicación visogestual.", icon: "◉",
+    id: "comunicacion", title: "Comunicación visual", level: "Nivel inicial", description: "Reconoce elementos que acompañan la comunicación visogestual.", icon: "◉", image: "https://images.pexels.com/photos/9017418/pexels-photo-9017418.jpeg?auto=compress&cs=tinysrgb&w=600",
     lessons: [
       { id: "atencion-visual", title: "Atención y contacto visual", duration: "4 min", summary: "La importancia de compartir la atención.", sections: [
         { heading: "Antes de iniciar", body: "Asegúrate de que la otra persona sepa que quieres comunicarte. Puedes acercarte dentro de su campo visual o llamar su atención de una manera respetuosa." },
@@ -37,7 +37,7 @@ const modules: Module[] = [
     ]
   },
   {
-    id: "alfabeto", title: "Alfabeto dactilológico", level: "En preparación", description: "Próximamente: material visual revisado para practicar el alfabeto.", icon: "Aa",
+    id: "alfabeto", title: "Alfabeto dactilológico", level: "En preparación", description: "Próximamente: material visual revisado para practicar el alfabeto.", icon: "Aa", image: "https://images.pexels.com/photos/9017383/pexels-photo-9017383.jpeg?auto=compress&cs=tinysrgb&w=600",
     lessons: [
       { id: "alfabeto-intro", title: "Conoce el alfabeto", duration: "Próximamente", summary: "Unidad pendiente de material visual validado.", pending: true, sections: [
         { heading: "Contenido en preparación", body: "Esta unidad se publicará cuando contemos con imágenes o videos de referencia fiables y autorización para utilizarlos. No mostraremos configuraciones de manos generadas o no verificadas." },
@@ -46,7 +46,7 @@ const modules: Module[] = [
     ]
   },
   {
-    id: "vocabulario", title: "Vocabulario cotidiano", level: "En preparación", description: "Unidades temáticas con vocabulario en contexto y fuentes documentadas.", icon: "⌁",
+    id: "vocabulario", title: "Vocabulario cotidiano", level: "En preparación", description: "Unidades temáticas con vocabulario en contexto y fuentes documentadas.", icon: "⌁", image: "https://images.pexels.com/photos/9017405/pexels-photo-9017405.jpeg?auto=compress&cs=tinysrgb&w=600",
     lessons: [
       { id: "vocabulario-intro", title: "Palabras de uso cotidiano", duration: "Próximamente", summary: "Contenido en revisión antes de su publicación.", pending: true, sections: [
         { heading: "Aprender en contexto", body: "El vocabulario se presentará con ejemplos y contexto comunicativo, no como una lista de equivalencias palabra por palabra." },
@@ -320,7 +320,7 @@ export default function App() {
                 const pending = module.lessons.every((lesson) => lesson.pending);
                 const active = index === 0;
                 return <button type="button" className={`dashboard-module-card ${active ? "is-current" : ""}`} key={module.id} onClick={() => openModule(module)}>
-                  <span className={`dashboard-module-art dashboard-art-${index + 1}`} aria-hidden="true">{index === 0 ? "✋" : index === 1 ? "Aa" : index === 2 ? "◉" : "▤"}</span>
+                  <span className={`dashboard-module-art dashboard-art-${index + 1}`}><img src={module.image} alt={`Fotografía de manos en comunicación por señas para ${module.title}`} loading="lazy" /></span>
                   <span className="dashboard-module-state">{pending ? "En preparación" : percent === 100 ? "Completado" : active ? "Continúa aquí" : "Disponible"}</span>
                   <span className="dashboard-module-number">0{index + 1}</span>
                   <strong>{module.title}</strong>
