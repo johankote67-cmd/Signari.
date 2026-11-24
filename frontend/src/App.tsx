@@ -283,79 +283,48 @@ export default function App() {
 
   return (
     <div className="app-layout">
-      <aside className={`sidebar ${mobileMenu ? "sidebar-open" : ""}`}>
-        <a className="brand" href="#inicio" onClick={() => setView("home")}><span className="brand-mark">S</span><span>signari</span></a>
-        <div className="side-label">APRENDIZAJE</div>
-        <button className={`nav-item ${view === "home" ? "active" : ""}`} onClick={() => { setView("home"); setMobileMenu(false); }}><span>⌂</span> Mi aprendizaje</button>
-        <button className={`nav-item ${view === "practice" ? "active" : ""}`} onClick={startPractice}><span>✎</span> Practicar</button>
-        <div className="side-label modules-label">MÓDULOS</div>
-        <div className="module-nav">{modules.map((module) => <button key={module.id} className={`module-nav-item ${activeModuleId === module.id ? "selected" : ""}`} onClick={() => openModule(module)}><span className="module-icon">{module.icon}</span><span className="module-nav-copy">{module.title}<small>{moduleProgress[module.id]}/{module.lessons.length} lecciones</small></span></button>)}</div>
-        <div className="sidebar-account">
-          {!isSupabaseConfigured ? <><strong>Cuenta Signari</strong><p>La conexión de cuenta se activará al configurar las variables públicas de Supabase.</p></> : authUser ? <><strong>Sesión conectada</strong><p>{authUser.email}</p><button className="account-button" onClick={signOut}>Cerrar sesión</button><small>{cloudReady ? "Progreso sincronizado" : "Conectando progreso…"}</small></> : <form onSubmit={submitAuth}><strong>{authMode === "login" ? "Iniciar sesión" : "Crear cuenta"}</strong>{authMode === "register" && <input aria-label="Nombre" placeholder="Nombre" value={authName} onChange={(e) => setAuthName(e.target.value)} required />}<input aria-label="Correo electrónico" type="email" placeholder="Correo electrónico" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required /><input aria-label="Contraseña" type="password" placeholder="Contraseña" minLength={6} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required /><button className="account-button" type="submit" disabled={authBusy}>{authBusy ? "Espera…" : authMode === "login" ? "Entrar" : "Registrarme"}</button><button className="account-mode" type="button" onClick={() => { setAuthMode(authMode === "login" ? "register" : "login"); setAuthMessage(""); }}>{authMode === "login" ? "Crear una cuenta" : "Ya tengo cuenta"}</button>{authMessage && <small role="status">{authMessage}</small>}</form>}
-        </div><div className="sidebar-bottom"><div className="mini-progress"><div className="mini-progress-top"><span>Tu avance</span><strong>{progress}%</strong></div><div className="progress-track"><span style={{ width: `${progress}%` }} /></div></div><p>Aprender también es construir comunidad.</p></div>
+      <aside className={\`sidebar \${mobileMenu ? "sidebar-open" : ""}\`}>
+        <a className="brand" href="#inicio" onClick={() => setView("home")}><span className="brand-mark">S</span><span>SIGNARI</span></a>
+        <nav className="enterprise-nav" aria-label="Navegación principal">
+          <button className={\`nav-item \${view === "home" ? "active" : ""}\`} onClick={() => { setView("home"); setMobileMenu(false); }}><span aria-hidden="true">▤</span>Aprender</button>
+          <button className="nav-item" onClick={() => { setView("home"); setMobileMenu(false); }}><span aria-hidden="true">▥</span>Diccionario LSM</button>
+          <button className={\`nav-item \${view === "practice" ? "active" : ""}\`} onClick={startPractice}><span aria-hidden="true">☷</span>Retos Diarios</button>
+          <button className="nav-item" onClick={() => setView("home")}><span aria-hidden="true">♛</span>Premium</button>
+          <button className="nav-item" onClick={() => setView("home")}><span aria-hidden="true">♙</span>Perfil</button>
+        </nav>
+        <div className="sidebar-account enterprise-account">
+          {authUser ? <><strong>Sesión conectada</strong><p>{authUser.email}</p><button className="account-button" onClick={signOut}>Cerrar sesión</button><small>{cloudReady ? "Progreso sincronizado" : "Conectando progreso…"}</small></> : <><strong>Cuenta Signari</strong><p>Inicia sesión para sincronizar tu aprendizaje.</p></>}
+        </div>
+        <div className="sidebar-bottom"><p>Lengua de Señas Mexicana</p></div>
       </aside>
 
       <main className="main-area">
         <header className="app-header"><button className="mobile-menu" aria-label="Abrir menú" onClick={() => setMobileMenu(!mobileMenu)}>☰</button><div className="breadcrumb">Signari <span>/</span> {view === "practice" ? "Práctica" : view === "lesson" ? activeModule.title : "Mi aprendizaje"}</div><span className="header-pill">LSM · Nivel inicial</span></header>
 
-        {view === "home" && <div className="dashboard-shell">
-          <section className="dashboard-main-column">
-            <section className="dashboard-hero">
-              <div className="dashboard-hero-copy">
-                <span className="dashboard-eyebrow">TU ESPACIO DE APRENDIZAJE</span>
-                <h1>Aprender nos conecta.</h1>
-                <p>Descubre la Lengua de Señas Mexicana y avanza a tu propio ritmo.</p>
-                <button className="dashboard-primary" onClick={() => openLesson(activeModule, activeModule.lessons[0])}>Continuar aprendiendo <span>→</span></button>
-              </div>
-              <div className="dashboard-hero-photo" role="img" aria-label="Persona comunicándose mediante lengua de señas" />
-            </section>
-            <div className="dashboard-section-title">
-              <div><span className="dashboard-eyebrow">RUTA DE APRENDIZAJE</span><h2>Tus módulos</h2><p>Avanza unidad por unidad y construye tus habilidades.</p></div>
-              <span className="dashboard-level">Nivel inicial</span>
+        {view === "home" && <div className="enterprise-dashboard">
+          <section className="enterprise-center">
+            <div className="enterprise-module-banner">
+              <div><span className="enterprise-eyebrow">RUTA DE APRENDIZAJE · NIVEL INICIAL</span><h1>MÓDULO 1: Fundamentos y Saludos en LSM</h1><p>Avanza a tu ritmo y desarrolla tus habilidades de comunicación visual.</p></div>
+              <div className="enterprise-module-progress"><div><span>8 / 25 tareas</span><strong>32%</strong></div><div className="enterprise-track"><span style={{width:"32%"}} /></div><button className="enterprise-continue" onClick={() => openLesson(modules[0], modules[0].lessons[0])}>CONTINUAR</button></div>
             </div>
-            <section className="dashboard-module-grid">
-              {modules.map((module, index) => {
-                const done = moduleProgress[module.id];
-                const percent = Math.round(done / module.lessons.length * 100);
-                const pending = module.lessons.every((lesson) => lesson.pending);
-                const active = index === 0;
-                return <button type="button" className={`dashboard-module-card ${active ? "is-current" : ""}`} key={module.id} onClick={() => openModule(module)}>
-                  <span className={`dashboard-module-art dashboard-art-${index + 1}`}><img src={module.image} alt={`Fotografía de manos en comunicación por señas para ${module.title}`} loading="lazy" /></span>
-                  <span className="dashboard-module-state">{pending ? "En preparación" : percent === 100 ? "Completado" : active ? "Continúa aquí" : "Disponible"}</span>
-                  <span className="dashboard-module-number">0{index + 1}</span>
-                  <strong>{module.title}</strong>
-                  <span className="dashboard-module-description">{module.description}</span>
-                  <span className="dashboard-module-progress"><span style={{width:`${percent}%`}} /></span>
-                  <span className="dashboard-module-meta">{done} de {module.lessons.length} lecciones <span>{percent}%</span></span>
-                </button>;
-              })}
-            </section>
-            <section className="dashboard-study-banner">
-              <div className="dashboard-study-icon">▣</div>
-              <div><strong>Aprende con contexto</strong><p>Consulta recursos y explicaciones antes de practicar.</p></div>
-              <span className="dashboard-study-note">Contenido en desarrollo</span>
-            </section>
-            <footer className="dashboard-footer">SIGNARI <span>Lengua de Señas Mexicana · Aprende, practica y conecta.</span></footer>
-          </section>
-          <aside className="dashboard-aside">
-            <section className="dashboard-side-card dashboard-progress-card">
-              <div className="dashboard-card-heading"><h3>Tu progreso general</h3><span>Nivel 1</span></div>
-              <div className="dashboard-progress-content">
-                <div className="dashboard-progress-ring" style={{"--dashboard-progress":`${progress * 3.6}deg`} as CSSProperties}><span>{progress}%</span></div>
-                <div><strong>Principiante</strong><p>{completed.filter((id) => availableLessons.some((lesson) => lesson.id === id)).length} / {availableLessons.length} lecciones</p><div className="dashboard-mini-track"><span style={{width:`${progress}%`}} /></div></div>
+            <section className="enterprise-path-section">
+              <div className="enterprise-section-heading"><span className="enterprise-eyebrow">PROGRAMA DEL MÓDULO</span><h2>Ruta de aprendizaje</h2></div>
+              <div className="enterprise-path">
+                <div className="enterprise-path-line" />
+                <article className="enterprise-node completed"><span className="enterprise-node-icon">✓</span><div className="enterprise-node-copy"><span className="enterprise-node-kicker">SUBMÓDULO 01 · COMPLETADO</span><h3>Introducción</h3><p>5 de 5 tareas finalizadas</p></div><span className="enterprise-node-status">COMPLETADO</span></article>
+                <article className="enterprise-node active"><span className="enterprise-node-icon">手</span><div className="enterprise-node-copy"><span className="enterprise-node-kicker">SUBMÓDULO 02 · EN CURSO</span><h3>El Alfabeto</h3><p>2 de 5 tareas completadas</p></div><button className="enterprise-start" onClick={() => openLesson(modules[0], modules[0].lessons[0])}>EMPEZAR</button></article>
+                <article className="enterprise-node locked"><span className="enterprise-node-icon">⌑</span><div className="enterprise-node-copy"><span className="enterprise-node-kicker">SUBMÓDULO 03 · BLOQUEADO</span><h3>Saludos y cortesía</h3><p>Completa el submódulo anterior para continuar</p></div><span className="enterprise-lock">⌑</span></article>
+                <article className="enterprise-node locked"><span className="enterprise-node-icon">⌑</span><div className="enterprise-node-copy"><span className="enterprise-node-kicker">SUBMÓDULO 04 · BLOQUEADO</span><h3>Presentaciones</h3><p>Completa el submódulo anterior para continuar</p></div><span className="enterprise-lock">⌑</span></article>
+                <article className="enterprise-node locked"><span className="enterprise-node-icon">⌑</span><div className="enterprise-node-copy"><span className="enterprise-node-kicker">SUBMÓDULO 05 · BLOQUEADO</span><h3>Primeras conversaciones</h3><p>Completa el submódulo anterior para continuar</p></div><span className="enterprise-lock">⌑</span></article>
               </div>
-              <div className="dashboard-stats"><div><strong>🔥 {completed.length ? "1" : "0"}</strong><span>Racha de días</span></div><div><strong>⚡ {completed.length * 10}</strong><span>XP acumulados</span></div><div><strong>♡ 5</strong><span>Intentos</span></div></div>
             </section>
-            <section className="dashboard-side-card dashboard-daily-card">
-              <div className="dashboard-card-heading"><h3>Reto de práctica</h3><span>+20 XP</span></div>
-              <div className="dashboard-daily-content"><span className="dashboard-daily-icon">✍</span><div><strong>Refuerza lo aprendido</strong><p>Responde preguntas sobre los fundamentos de LSM.</p></div></div>
-              <button className="dashboard-secondary" onClick={startPractice}>Comenzar práctica <span>→</span></button>
-            </section>
-            <section className="dashboard-side-card dashboard-community-card">
-              <div className="dashboard-card-heading"><h3>Aprendizaje responsable</h3><span>LSM</span></div>
-              <p>El contenido visual de señas se incorporará con fuentes identificables y revisión adecuada. Las imágenes decorativas no sustituyen modelos lingüísticos validados.</p>
-            </section>
-            <section className="dashboard-premium-card"><span className="dashboard-premium-label">SIGNARI PREMIUM</span><h3>Aprende sin anuncios.</h3><p>Apoya el proyecto y disfruta una experiencia sin publicidad en los submódulos.</p><span className="dashboard-premium-soon">Planes próximamente</span></section>
+            <footer className="enterprise-footer"><span>SIGNARI</span><span>Lengua de Señas Mexicana · Aprende, practica y conecta.</span></footer>
+          </section>
+          <aside className="enterprise-right">
+            <section className="enterprise-metrics"><div><span className="metric-symbol flame">♨</span><strong>4 días</strong><small>RACHA</small></div><div><span className="metric-symbol xp">ϟ</span><strong>120 XP</strong><small>EXPERIENCIA</small></div><div><span className="metric-symbol crown">♛</span><strong>Premium</strong><small>CUENTA</small></div></section>
+            <section className="enterprise-card objectives-card"><div className="enterprise-card-title"><h2>Objetivos Académicos</h2><span>SEMANA ACTUAL</span></div><label className="enterprise-check-row"><input type="checkbox" defaultChecked />Completar una sesión de aprendizaje</label><label className="enterprise-check-row"><input type="checkbox" />Repasar vocabulario</label><label className="enterprise-check-row"><input type="checkbox" />Practicar lo aprendido</label><div className="enterprise-week-progress"><span>Progreso semanal</span><strong>1 / 7 días</strong></div><div className="enterprise-track"><span style={{width:"14.28%"}} /></div></section>
+            <section className="enterprise-card dictionary-card"><div className="enterprise-card-title"><h2>Diccionario LSM</h2><span>ÚLTIMA SEÑA</span></div><div className="dictionary-visual"><div className="dictionary-placeholder"><span>HOLA</span><small>RECURSO VISUAL EN VALIDACIÓN</small></div></div><div className="dictionary-word"><strong>Hola</strong><span>Saludo · LSM</span></div><p>La fotografía de referencia se añadirá cuando el material esté validado por una fuente competente en LSM.</p></section>
+            <section className="enterprise-premium"><span className="premium-overline">EXPERIENCIA EXCLUSIVA</span><h2>SIGNARI <em>Premium</em></h2><p>Aprende sin anuncios y apoya el crecimiento de la plataforma.</p><button onClick={() => setView("home")}><span>♙</span> GESTIÓN DE CUENTA</button></section>
           </aside>
         </div>}
 
